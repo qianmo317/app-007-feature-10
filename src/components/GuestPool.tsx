@@ -12,9 +12,12 @@ interface Props {
   onDragStart: (id: string | null) => void;
   conflictMap: Map<string, string[]>;
   onUpdate?: (guest: Guest) => void;
+  visibleIds?: Set<string> | null;
+  filterLabel?: string | null;
+  onClearFilter?: () => void;
 }
 
-export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemove, onDragStart, conflictMap, onUpdate }: Props) {
+export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemove, onDragStart, conflictMap, onUpdate, visibleIds, filterLabel, onClearFilter }: Props) {
   const [showImport, setShowImport] = useState(false);
   const [importText, setImportText] = useState('');
   const [filterTag, setFilterTag] = useState<string>('');
@@ -31,6 +34,7 @@ export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemov
   };
 
   const filtered = guests.filter((g) => {
+    if (visibleIds && !visibleIds.has(g.id)) return false;
     const matchTag = !filterTag || g.tags.includes(filterTag);
     const matchSearch = !search || g.name.includes(search);
     return matchTag && matchSearch;
@@ -65,6 +69,12 @@ export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemov
           ))}
         </select>
       </div>
+      {filterLabel && visibleIds && (
+        <div className="pool-filter-banner">
+          <span>统计筛选：{filterLabel}（{visibleIds.size} 人）</span>
+          <button onClick={onClearFilter} title="清除筛选">×</button>
+        </div>
+      )}
       {selectedGuest && onUpdate && (
         <div className="guest-editor">
           <label>

@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPlan, savePlan, setRecentPlanId } from '../db';
 import { createHistoryManager } from '../history';
-import { getConflictMap, getTableStats } from '../utils';
+import { getConflictMap, getSeatedIds, matchStatsFilter, describeStatsFilter } from '../utils';
+import type { StatsFilter } from '../utils';
 import type { Plan as PlanType, Command } from '../types';
 import GuestPool from '../components/GuestPool';
 import Canvas from '../components/Canvas';
@@ -16,12 +17,14 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(true);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   const [dragGuestId, setDragGuestId] = useState<string | null>(null);
+  const [statFilter, setStatFilter] = useState<StatsFilter | null>(null);
   const historyRef = useRef<ReturnType<typeof createHistoryManager> | null>(null);
   const [conflictMap, setConflictMap] = useState<Map<string, string[]>>(new Map());
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!id) return;
+    setStatFilter(null);
     getPlan(id).then((p) => {
       if (!p) {
         const fallback = { id, name: '未命名方案', tables: [], guests: [], rules: [], updatedAt: Date.now() };
@@ -83,7 +86,11 @@ export default function PlanPage() {
   if (loading) return <div className="plan-loading">加载中...</div>;
   if (!plan) return <div className="plan-loading">方案不存在</div>;
 
-  const stats = getTableStats(plan);
+  const seatedIds = getSeatedIds(plan);
+  const visibleIds = statFilter
+    ? new Set(plan.guests.filter((g) => matchStatsFilter(g, statFilter, plan, seatedIds)).map((g) => g.id))
+    : null;
+  const filterLabel = statFilter ? describeStatsFilter(statFilter, plan) : null;
 
   return (
     <div className="plan-page">
@@ -102,7 +109,7 @@ export default function PlanPage() {
           <button onClick={() => navigate(`/plan/${plan.id}/print`)}>打印 / 导出</button>
         </div>
       </header>
-      <StatsBar stats={stats} />
+      <StatsBar plan={plan} activeFilter={statFilter} onFilterChange={setStatFilter} />
       <div className="plan-body">
         <GuestPool
           guests={plan.guests}
@@ -112,6 +119,9 @@ export default function PlanPage() {
           onRemove={(gid) => dispatch({ type: 'removeGuest', guestId: gid })}
           onDragStart={setDragGuestId}
           conflictMap={conflictMap}
+          visibleIds={visibleIds}
+          filterLabel={filterLabel}
+          onClearFilter={() => setStatFilter(null)}
           onUpdate={(g) => {
             const guests = plan.guests.map((gg) => gg.id === g.id ? g : gg);
             dispatch({ type: 'updateGuests', guests });

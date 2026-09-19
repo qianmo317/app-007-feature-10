@@ -165,7 +165,9 @@ html, body, #root {
 
 .stats-bar {
   display: flex;
-  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
   padding: 10px 20px;
   background: #fff8f0;
   border-bottom: 1px solid #e8e0d8;
@@ -176,6 +178,136 @@ html, body, #root {
 .stat-item b {
   color: #c0392b;
   margin-left: 4px;
+}
+
+.stat-item.clickable {
+  cursor: pointer;
+  padding: 2px 8px;
+  margin: -2px -8px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+}
+
+.stat-item.clickable:hover {
+  background: #fff;
+  border-color: #e8e0d8;
+}
+
+.stat-item.active {
+  background: #fff8e1;
+  border-color: #d4af37;
+}
+
+.stats-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  border-left: 1px solid #ecd9c0;
+  padding-left: 16px;
+}
+
+.stats-group-label {
+  color: #999;
+  font-size: 12px;
+}
+
+.tag-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #e8e0d8;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tag-stat:hover {
+  border-color: #d4af37;
+}
+
+.tag-stat.active {
+  background: #fff8e1;
+  border-color: #d4af37;
+}
+
+.tag-stat b {
+  color: #c0392b;
+}
+
+.tag-stat-sub {
+  color: #888;
+  font-size: 11px;
+}
+
+.tag-stat-sub.warn {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.stat-alert {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.stat-alert.danger {
+  background: #ffeaea;
+  border-color: #e74c3c;
+  color: #c0392b;
+}
+
+.stat-alert.warn {
+  background: #fff8e1;
+  border-color: #d4af37;
+  color: #856404;
+}
+
+.stat-alert.ok {
+  background: #eafaf1;
+  border-color: #27ae60;
+  color: #1e8449;
+}
+
+.stat-alert.active {
+  box-shadow: 0 0 0 2px #c0392b inset;
+}
+
+.alert-detail {
+  font-weight: 600;
+}
+
+.danger-text {
+  color: #c0392b;
+}
+
+.pool-filter-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff8e1;
+  border: 1px solid #d4af37;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: #856404;
+}
+
+.pool-filter-banner button {
+  background: transparent;
+  border: none;
+  color: #856404;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
 }
 
 .plan-body {
