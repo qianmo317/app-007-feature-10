@@ -2,12 +2,12 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPlan, savePlan, setRecentPlanId } from '../db';
 import { createHistoryManager } from '../history';
-import { getConflictMap, getTableStats } from '../utils';
+import { getConflictMap, getSeatedIds } from '../utils';
 import type { Plan as PlanType, Command } from '../types';
 import GuestPool from '../components/GuestPool';
 import Canvas from '../components/Canvas';
 import RulesPanel from '../components/RulesPanel';
-import StatsBar from '../components/StatsBar';
+import StatsBar, { type StatFilter } from '../components/StatsBar';
 
 export default function PlanPage() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +16,7 @@ export default function PlanPage() {
   const [loading, setLoading] = useState(true);
   const [selectedGuestId, setSelectedGuestId] = useState<string | null>(null);
   const [dragGuestId, setDragGuestId] = useState<string | null>(null);
+  const [statFilter, setStatFilter] = useState<StatFilter | null>(null);
   const historyRef = useRef<ReturnType<typeof createHistoryManager> | null>(null);
   const [conflictMap, setConflictMap] = useState<Map<string, string[]>>(new Map());
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -83,7 +84,7 @@ export default function PlanPage() {
   if (loading) return <div className="plan-loading">加载中...</div>;
   if (!plan) return <div className="plan-loading">方案不存在</div>;
 
-  const stats = getTableStats(plan);
+  const seatedIds = getSeatedIds(plan);
 
   return (
     <div className="plan-page">
@@ -102,7 +103,7 @@ export default function PlanPage() {
           <button onClick={() => navigate(`/plan/${plan.id}/print`)}>打印 / 导出</button>
         </div>
       </header>
-      <StatsBar stats={stats} />
+      <StatsBar plan={plan} statFilter={statFilter} onSelectStat={setStatFilter} />
       <div className="plan-body">
         <GuestPool
           guests={plan.guests}
@@ -112,6 +113,9 @@ export default function PlanPage() {
           onRemove={(gid) => dispatch({ type: 'removeGuest', guestId: gid })}
           onDragStart={setDragGuestId}
           conflictMap={conflictMap}
+          statFilter={statFilter}
+          seatedIds={seatedIds}
+          onClearStatFilter={() => setStatFilter(null)}
           onUpdate={(g) => {
             const guests = plan.guests.map((gg) => gg.id === g.id ? g : gg);
             dispatch({ type: 'updateGuests', guests });

@@ -165,12 +165,117 @@ html, body, #root {
 
 .stats-bar {
   display: flex;
-  gap: 24px;
+  flex-direction: column;
+  gap: 6px;
   padding: 10px 20px;
   background: #fff8f0;
   border-bottom: 1px solid #e8e0d8;
   flex-shrink: 0;
   font-size: 14px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.tag-stats {
+  gap: 12px;
+}
+
+.tag-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  border: 1px solid #e8e0d8;
+  border-radius: 6px;
+  background: #fff;
+}
+
+.tag-stat.active {
+  border-color: #c0392b;
+  background: #fdf1ee;
+}
+
+.tag-stat-name {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #5b4636;
+}
+
+.tag-stat-nums {
+  font-size: 12px;
+  color: #8a7a6a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-stat-num {
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 12px;
+  color: #8a7a6a;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+.tag-stat-num:hover {
+  background: #f5ece2;
+}
+
+.tag-stat-num.warn {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.tag-stat-num.active {
+  background: #c0392b;
+  color: #fff;
+}
+
+.stats-alerts {
+  gap: 16px;
+}
+
+.stat-alert {
+  font-size: 13px;
+  color: #b3541e;
+  background: #fdeee0;
+  border: 1px solid #f0d5b8;
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+.stat-filter-banner {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #5b4636;
+  background: #fdf1ee;
+  border: 1px solid #ecc9bd;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-bottom: 8px;
+}
+
+.stat-filter-banner button {
+  margin-left: auto;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #c0392b;
+  font-size: 14px;
+  padding: 0 2px;
 }
 
 .stat-item b {

@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Plan } from './types';
+import { TAG_OPTIONS } from './types';
 
 export function generateId(): string {
   return uuidv4();
@@ -83,6 +84,47 @@ export function getTableStats(plan: Plan) {
     emptySeats += Math.max(0, t.capacity - t.seatOrder.length);
   }
   return { seated, capacity, emptySeats, totalGuests: plan.guests.length, unassignedCount: unassigned.length };
+}
+
+export function getSeatedIds(plan: Plan): Set<string> {
+  const ids = new Set<string>();
+  for (const t of plan.tables) for (const id of t.seatOrder) ids.add(id);
+  return ids;
+}
+
+export type TagStat = { tag: string; total: number; seated: number; unassigned: number };
+
+export function getTagStats(plan: Plan): TagStat[] {
+  const seatedIds = getSeatedIds(plan);
+  return TAG_OPTIONS.map((tag) => {
+    const withTag = plan.guests.filter((g) => g.tags.includes(tag));
+    const seated = withTag.filter((g) => seatedIds.has(g.id)).length;
+    return { tag, total: withTag.length, seated, unassigned: withTag.length - seated };
+  }).filter((s) => s.total > 0);
+}
+
+export type ClusterWarning = { tableLabel: string; tag: string; count: number; seated: number };
+
+// 某一桌上同一标签的人明显扎堆（≥4 人且占该桌已坐人数 3/4 以上）时给出提醒
+export function getTableClusterWarnings(plan: Plan): ClusterWarning[] {
+  const guestById = new Map(plan.guests.map((g) => [g.id, g]));
+  const warnings: ClusterWarning[] = [];
+  for (const t of plan.tables) {
+    const seatedGuests = t.seatOrder
+      .map((id) => guestById.get(id))
+      .filter((g): g is NonNullable<typeof g> => !!g);
+    if (seatedGuests.length < 4) continue;
+    const counts = new Map<string, number>();
+    for (const g of seatedGuests) {
+      for (const tag of g.tags) counts.set(tag, (counts.get(tag) || 0) + 1);
+    }
+    for (const [tag, count] of counts) {
+      if (count >= 4 && count >= Math.ceil((seatedGuests.length * 3) / 4)) {
+        warnings.push({ tableLabel: t.label, tag, count, seated: seatedGuests.length });
+      }
+    }
+  }
+  return warnings;
 }
 
 export function parseGuestsText(text: string): { name: string; tags: string[] }[] {

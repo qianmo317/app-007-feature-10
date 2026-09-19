@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Guest } from '../types';
 import { generateId, parseGuestsText } from '../utils';
 import { TAG_OPTIONS } from '../types';
+import type { StatFilter } from './StatsBar';
 
 interface Props {
   guests: Guest[];
@@ -12,9 +13,12 @@ interface Props {
   onDragStart: (id: string | null) => void;
   conflictMap: Map<string, string[]>;
   onUpdate?: (guest: Guest) => void;
+  statFilter?: StatFilter | null;
+  seatedIds?: Set<string>;
+  onClearStatFilter?: () => void;
 }
 
-export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemove, onDragStart, conflictMap, onUpdate }: Props) {
+export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemove, onDragStart, conflictMap, onUpdate, statFilter, seatedIds, onClearStatFilter }: Props) {
   const [showImport, setShowImport] = useState(false);
   const [importText, setImportText] = useState('');
   const [filterTag, setFilterTag] = useState<string>('');
@@ -33,7 +37,13 @@ export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemov
   const filtered = guests.filter((g) => {
     const matchTag = !filterTag || g.tags.includes(filterTag);
     const matchSearch = !search || g.name.includes(search);
-    return matchTag && matchSearch;
+    let matchStat = true;
+    if (statFilter) {
+      matchStat = g.tags.includes(statFilter.tag);
+      if (matchStat && statFilter.status === 'seated') matchStat = !!seatedIds?.has(g.id);
+      if (matchStat && statFilter.status === 'unassigned') matchStat = !seatedIds?.has(g.id);
+    }
+    return matchTag && matchSearch && matchStat;
   });
 
   const selectedGuest = guests.find((g) => g.id === selectedId);
@@ -119,6 +129,14 @@ export default function GuestPool({ guests, selectedId, onSelect, onAdd, onRemov
             />
             儿童椅
           </label>
+        </div>
+      )}
+      {statFilter && (
+        <div className="stat-filter-banner">
+          只看：{statFilter.tag}
+          {statFilter.status === 'seated' ? '（已入座）' : statFilter.status === 'unassigned' ? '（未安排）' : ''}
+          （{filtered.length} 人）
+          <button onClick={onClearStatFilter}>×</button>
         </div>
       )}
       <div className="guest-list">
